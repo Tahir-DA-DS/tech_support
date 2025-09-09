@@ -76,4 +76,33 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeLightbox();
 });
 
+// Netlify form submission: submit via fetch then redirect to thank-you
+const contactForm = document.querySelector('form[name="contact"]');
+if (contactForm) {
+  contactForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    const formAction = contactForm.getAttribute('action') || '/thank-you.html';
+    const formData = new FormData(contactForm);
+    // Ensure form-name is included for Netlify
+    if (!formData.get('form-name')) {
+      const nameInput = contactForm.querySelector('input[name="form-name"]');
+      if (nameInput && nameInput.value) {
+        formData.append('form-name', nameInput.value);
+      } else {
+        formData.append('form-name', 'contact');
+      }
+    }
+    fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(formData).toString(),
+    })
+      .then(() => { window.location.assign(formAction); })
+      .catch(err => {
+        console.error('Form submit failed', err);
+        alert('There was a problem sending your message. Please email me at tahir.adeleye@gmail.com.');
+      });
+  });
+}
+
 
